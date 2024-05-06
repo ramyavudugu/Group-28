@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nutritional Composition Comparison - Stacked Bar Chart</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    /* Add CSS styles here */
+    .bar {
+      stroke: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Nutritional Composition Comparison - Stacked Bar Chart</h2>
+  <div id="stacked-bar-chart"></div>
+
+  <script>
+    // Sample data (replace with your actual data)
+    const data = [
+      { cereal: "Apple Cinnamon Cheerios", calories: 110, protein: 2, fat: 2, fiber: 1.5 },
+      { cereal: "Cheerios", calories: 110, protein: 6, fat: 2, fiber: 2 },
+      { cereal: "Cinnamon Toast Crunch", calories: 120, protein: 1, fat: 3, fiber: 0 },
+      // Add more cereal data here
+    ];
+
+    // Set up dimensions
+    const margin = { top: 90, right: 90, bottom: 100, left: 100 };
+    const width = 700 - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
+
+    // Set up SVG
+    const svg = d3.select("#stacked-bar-chart")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Define x scale (cereal names)
+    const x = d3.scaleBand()
+      .domain(data.map(d => d.cereal))
+      .range([0, width])
+      .padding(0.1);
+
+    // Define y scale (nutrient values)
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.calories)]) // Adjust the domain based on your data
+      .range([height, 0]);
+
+    // Define color scale (for different nutrients)
+    const color = d3.scaleOrdinal()
+      .domain(["calories", "protein", "fat", "fiber"]) // List of nutrients
+      .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]); // Colors for each nutrient
+
+    // Stack the data (grouping by nutrient)
+    const stackedData = d3.stack()
+      .keys(["calories", "protein", "fat", "fiber"])(data);
+
+    // Create bars
+    svg.selectAll(".bar")
+      .data(stackedData)
+      .enter().append("g")
+        .attr("fill", d => color(d.key))
+      .selectAll("rect")
+      .data(d => d)
+      .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", d => x(d.data.cereal))
+        .attr("y", d => y(d[1]))
+        .attr("height", d => y(d[0]) - y(d[1]))
+        .attr("width", x.bandwidth());
+
+    // Add x-axis
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+      .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .attr("text-anchor", "end");
+
+    // Add y-axis
+    svg.append("g")
+      .call(d3.axisLeft(y));
+  </script>
+</body>
+</html>

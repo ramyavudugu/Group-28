@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bar Chart - Shelf Placement Analysis</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    /* Add CSS styles here */
+    .bar {
+      fill: steelblue;
+    }
+    .bar:hover {
+      fill: orange;
+    }
+    .axis text {
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Bar Chart - Shelf Placement Analysis</h2>
+  <div id="bar-chart"></div>
+
+  <script>
+    // Sample data (replace with your actual data)
+    const shelfData = [
+      { shelf: 1, count: 10 },
+      { shelf: 2, count: 15 },
+      { shelf: 3, count: 8 },
+      // Add more shelf data here
+    ];
+
+    // Set up dimensions
+    const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+    const width = 600 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
+    // Set up SVG
+    const svg = d3.select("#bar-chart")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Define x scale (shelf numbers)
+    const x = d3.scaleBand()
+      .domain(shelfData.map(d => d.shelf))
+      .range([0, width])
+      .padding(0.1);
+
+    // Define y scale (count of cereals)
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(shelfData, d => d.count)])
+      .nice()
+      .range([height, 0]);
+
+    // Draw bars
+    svg.selectAll(".bar")
+      .data(shelfData)
+      .enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("x", d => x(d.shelf))
+      .attr("width", x.bandwidth())
+      .attr("y", d => y(d.count))
+      .attr("height", d => height - y(d.count));
+
+    // Add x-axis
+    svg.append("g")
+      .attr("class", "x-axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    // Add y-axis
+    svg.append("g")
+      .attr("class", "y-axis")
+      .call(d3.axisLeft(y));
+
+    // Add x-axis label
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", height + margin.bottom - 5)
+      .style("text-anchor", "middle")
+      .text("Shelf Number");
+
+    // Add y-axis label
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -height / 2)
+      .attr("y", -margin.left + 15)
+      .style("text-anchor", "middle")
+      .text("Number of Cereals");
+
+  </script>
+</body>
+</html>
